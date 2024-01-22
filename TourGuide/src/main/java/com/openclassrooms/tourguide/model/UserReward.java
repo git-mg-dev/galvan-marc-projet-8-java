@@ -1,12 +1,9 @@
-package com.openclassrooms.tourguide.user;
-
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
+package com.openclassrooms.tourguide.model;
 
 public class UserReward {
 
-	public final VisitedLocation visitedLocation;
-	public final Attraction attraction;
+	private final VisitedLocation visitedLocation;
+	private final Attraction attraction;
 	private int rewardPoints;
 	public UserReward(VisitedLocation visitedLocation, Attraction attraction, int rewardPoints) {
 		this.visitedLocation = visitedLocation;
@@ -26,5 +23,7 @@ public class UserReward {
 	public int getRewardPoints() {
 		return rewardPoints;
 	}
+
+	public Attraction getAttraction() { return attraction; }
 	
 }
