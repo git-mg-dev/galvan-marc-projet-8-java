@@ -1,6 +1,8 @@
 package com.openclassrooms.tourguide.tracker;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,10 +19,12 @@ public class Tracker extends Thread {
 	private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private final TourGuideService tourGuideService;
+	private final HashMap<UUID, Boolean> trackingMap;
 	private boolean stop = false;
 
 	public Tracker(TourGuideService tourGuideService) {
 		this.tourGuideService = tourGuideService;
+		this.trackingMap = new HashMap<>();
 
 		executorService.submit(this);
 	}
@@ -45,7 +49,25 @@ public class Tracker extends Thread {
 			List<User> users = tourGuideService.getAllUsers();
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
-			users.forEach(u -> tourGuideService.trackUserLocation(u));
+
+			// Tracking users location and calculating rewards
+			users.forEach(tourGuideService::trackUserLocation);
+
+			// Wait for all rewards to be calculated
+			boolean finished = false;
+			while(!finished && trackingMap.size() < users.size()) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(100);
+				} catch (InterruptedException e) {
+					break;
+				}
+
+				if(!trackingMap.containsValue(false)) {
+					finished = true;
+				}
+			}
+			trackingMap.clear();
+
 			stopWatch.stop();
 			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
 			stopWatch.reset();
@@ -56,6 +78,9 @@ public class Tracker extends Thread {
 				break;
 			}
 		}
+	}
 
+	public void endUserTracking(UUID userId) {
+		trackingMap.put(userId, true);
 	}
 }

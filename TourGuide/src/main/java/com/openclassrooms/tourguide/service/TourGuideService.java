@@ -1,15 +1,22 @@
 package com.openclassrooms.tourguide.service;
 
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
-import com.openclassrooms.tourguide.model.*;
+import com.openclassrooms.tourguide.model.NearByAttraction;
+import com.openclassrooms.tourguide.model.Provider;
+import com.openclassrooms.tourguide.model.User;
+import com.openclassrooms.tourguide.model.UserReward;
 import com.openclassrooms.tourguide.tracker.Tracker;
-import com.openclassrooms.tourguide.util.GpsUtil;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
+import gpsUtil.GpsUtil;
+import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
+import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,11 +28,13 @@ public class TourGuideService {
 	private final RewardsService rewardsService;
 	private final TripPricerService tripPricerService = new TripPricerService();
 	public final Tracker tracker;
+	public final ExecutorService executorService = Executors.newFixedThreadPool(1000);
 	boolean testMode = true;
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsService = rewardsService;
+		//this.executorService = Executors.newFixedThreadPool(internalUserNumber);
 		
 		Locale.setDefault(Locale.US);
 
@@ -44,11 +53,10 @@ public class TourGuideService {
 	}
 
 	public VisitedLocation getUserLocation(User user) {
-		if (!user.getVisitedLocations().isEmpty()) {
-			return user.getLastVisitedLocation();
-		} else {
-			return trackUserLocation(user);
+		if (user.getVisitedLocations().isEmpty()) {
+			trackUserLocation(user);
 		}
+		return user.getLastVisitedLocation();
 	}
 
 	public User getUser(String userName) {
@@ -65,6 +73,11 @@ public class TourGuideService {
 		}
 	}
 
+	/**
+	 * Gets trip deals for a user
+	 * @param user
+	 * @return a list of providers and their deal
+	 */
 	public List<Provider> getTripDeals(User user) {
 		int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(userReward -> userReward.getRewardPoints()).sum();
 		List<Provider> providers = tripPricerService.getPrice(tripPricerApiKey, user.getUserId(),
@@ -74,18 +87,37 @@ public class TourGuideService {
 		return providers;
 	}
 
-	public VisitedLocation trackUserLocation(User user) {
-		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-		user.addToVisitedLocations(visitedLocation);
-		rewardsService.calculateRewards(user);
-		return visitedLocation;
+	/**
+	 * Gets the current location of a user and calculates rewards for user
+	 * @param user
+	 */
+	public void trackUserLocation(User user) {
+		CompletableFuture.supplyAsync(() -> { return gpsUtil.getUserLocation(user.getUserId()); }, executorService)
+				.thenAccept(visitedLocation -> addUserVisitedLocationAndCalculateRewards(user, visitedLocation));
 	}
 
+	/**
+	 * Add a location to user list of visited locations and calculates rewards
+	 * @param user
+	 * @param visitedLocation
+	 */
+	private void addUserVisitedLocationAndCalculateRewards(User user, VisitedLocation visitedLocation) {
+		user.addToVisitedLocations(visitedLocation);
+		rewardsService.calculateRewards(user);
+		tracker.endUserTracking(user.getUserId());
+	}
+
+	/**
+	 * Gets the 5 nearest attractions to a user
+	 * @param userId
+	 * @param visitedLocation current position of a user
+	 * @return a list of the 5 nearest attractions
+	 */
 	public List<NearByAttraction> getNearByAttractions(UUID userId, VisitedLocation visitedLocation) {
 		SortedMap<Double,NearByAttraction> nearbyAttractions = new TreeMap<>();
 
 		for (Attraction attraction : gpsUtil.getAttractions()) {
-			double distance = rewardsService.getDistance(visitedLocation.getLocation(), attraction);
+			double distance = rewardsService.getDistance(visitedLocation.location, attraction);
 			int rewardPoints = rewardsService.getRewardPoints(attraction, userId);
 			NearByAttraction nearByAttraction = new NearByAttraction(attraction, distance, rewardPoints);
 			nearbyAttractions.put(distance, nearByAttraction);

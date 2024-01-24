@@ -1,6 +1,7 @@
 package com.openclassrooms.tourguide.model;
 
 import java.util.UUID;
+import gpsUtil.location.Attraction;
 
 public class NearByAttraction {
     private final UUID attractionId;
@@ -11,10 +12,10 @@ public class NearByAttraction {
     private final int rewardPoints;
 
     public NearByAttraction(Attraction attraction, Double distanceFromUser, int rewardPoints) {
-        this.attractionId = attraction.getAttractionId();
-        this.name = attraction.getAttractionName();
-        this.longitude = attraction.getLongitude();
-        this.latitude = attraction.getLatitude();
+        this.attractionId = attraction.attractionId;
+        this.name = attraction.attractionName;
+        this.longitude = attraction.longitude;
+        this.latitude = attraction.latitude;
         this.distanceFromUser = distanceFromUser;
         this.rewardPoints = rewardPoints;
     }

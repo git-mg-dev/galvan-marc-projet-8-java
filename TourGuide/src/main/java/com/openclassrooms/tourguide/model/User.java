@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import gpsUtil.location.VisitedLocation;
+
 public class User {
 	private final UUID userId;
 	private final String userName;
@@ -68,8 +70,8 @@ public class User {
 	}
 	
 	public void addUserReward(UserReward userReward) {
-		String attractionName = userReward.getAttraction().getAttractionName();
-		if(userRewards.stream().noneMatch(reward -> reward.getAttraction().getAttractionName().equals(attractionName))) {
+		String attractionName = userReward.getAttraction().attractionName;
+		if(userRewards.stream().noneMatch(reward -> reward.getAttraction().attractionName.equals(attractionName))) {
 			userRewards.add(userReward);
 		}
 	}

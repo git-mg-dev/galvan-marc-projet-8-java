@@ -3,6 +3,8 @@ package com.openclassrooms.tourguide.model;
 import java.util.List;
 import java.util.UUID;
 
+import gpsUtil.location.Location;
+
 public class UserLocation {
     private final UUID userId;
     private final String username;

@@ -3,6 +3,7 @@ package com.openclassrooms.tourguide;
 import java.util.List;
 
 import com.openclassrooms.tourguide.model.*;
+import gpsUtil.location.VisitedLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +33,7 @@ public class TourGuideController {
         VisitedLocation visitedLocation = tourGuideService.getUserLocation(user);
         List<NearByAttraction> nearByAttractions = tourGuideService.getNearByAttractions(user.getUserId(), visitedLocation);
 
-        return new UserLocation(user.getUserId(), userName, visitedLocation.getLocation(), nearByAttractions);
+        return new UserLocation(user.getUserId(), userName, visitedLocation.location, nearByAttractions);
     }
     
     @RequestMapping("/getRewards") 
