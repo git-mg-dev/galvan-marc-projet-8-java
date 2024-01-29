@@ -6,9 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-//import com.openclassrooms.tourguide.model.Attraction;
-//import com.openclassrooms.tourguide.model.Location;
-//import com.openclassrooms.tourguide.model.VisitedLocation;
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
