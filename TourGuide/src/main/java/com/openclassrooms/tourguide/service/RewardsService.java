@@ -31,14 +31,7 @@ public class RewardsService {
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
-		//this.executorService = Executors.newFixedThreadPool(1);
 	}
-
-	/*public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral, int internalUserNumber) {
-		this.gpsUtil = gpsUtil;
-		this.rewardsCentral = rewardCentral;
-		this.executorService = Executors.newFixedThreadPool(internalUserNumber);
-	}*/
 	
 	public void setProximityBuffer(int proximityBuffer) {
 		this.proximityBuffer = proximityBuffer;

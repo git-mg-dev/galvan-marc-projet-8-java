@@ -40,10 +40,11 @@ public class TestPerformance {
 
         nbUserTimeLimit.keySet().forEach(nbUser -> {
             // WHEN
-            long runTime = runTrackLocation(nbUser);
+			System.out.println("highVolumeTrackLocation: execution for " + nbUser );
+			long runTime = runTrackLocation(nbUser);
 
             // THEN
-            System.out.println("highVolumeTrackLocation: Time Elapsed for " + nbUser + ": " + runTime + " seconds.");
+            System.out.println("-- Time Elapsed: " + runTime + " seconds.");
             assertTrue(nbUserTimeLimit.get(nbUser) >= runTime);
         });
     }
@@ -79,10 +80,11 @@ public class TestPerformance {
 
         nbUserTimeLimit.keySet().forEach(nbUser -> {
             // WHEN
-            long runTime = runGetRewards(nbUser);
+			System.out.println("highVolumeGetRewards: execution for " + nbUser);
+			long runTime = runGetRewards(nbUser);
 
             // THEN
-            System.out.println("highVolumeGetRewards: Time Elapsed for " + nbUser + ": " + runTime + " seconds.");
+            System.out.println("-- Time Elapsed: " + runTime + " seconds.");
             assertTrue(nbUserTimeLimit.get(nbUser) >= runTime);
         });
     }

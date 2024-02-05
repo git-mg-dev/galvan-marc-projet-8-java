@@ -34,7 +34,6 @@ public class TourGuideService {
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsService = rewardsService;
-		//this.executorService = Executors.newFixedThreadPool(internalUserNumber);
 		
 		Locale.setDefault(Locale.US);
 
@@ -49,6 +48,9 @@ public class TourGuideService {
 	}
 
 	public List<UserReward> getUserRewards(User user) {
+		if(user.getUserRewards().isEmpty()) {
+			rewardsService.calculateRewards(user);
+		}
 		return user.getUserRewards();
 	}
 
